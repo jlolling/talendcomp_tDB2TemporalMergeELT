@@ -1,0 +1,254 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.process.INode 
+		org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.metadata.IMetadataTable 
+		org.talend.core.model.metadata.IMetadataColumn 
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.metadata.types.JavaTypesManager
+		org.talend.core.model.metadata.types.JavaType
+		java.util.List
+		java.util.ArrayList
+    	java.util.Map
+    	java.util.HashMap
+	" 
+%>
+
+<% 
+    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+    INode node = (INode)codeGenArgument.getArgument();
+    String cid = node.getUniqueName();
+    boolean useExistingConnection = "true".equals(ElementParameterParser.getValue(node, "__USE_EXISTING_CONNECTION__"));
+    String connection = ElementParameterParser.getValue(node, "__CONNECTION__");
+    String host = ElementParameterParser.getValue(node, "__HOST__");
+    String port = ElementParameterParser.getValue(node, "__PORT__");
+    String connectionProperties = ElementParameterParser.getValue(node, "__CONNECTION_PROPERTIES__");
+    if (connectionProperties == null || connectionProperties.isEmpty()) {
+    	connectionProperties = "null";
+    }
+    String sourceSchema = ElementParameterParser.getValue(node, "__SOURCE_SCHEMA__");
+    String database = ElementParameterParser.getValue(node, "__DBNAME__");
+    String user = ElementParameterParser.getValue(node, "__USER__");
+    String password = ElementParameterParser.getValue(node, "__PASS__");
+    String sourceTable = ElementParameterParser.getValue(node, "__TABLE__");
+    String where = ElementParameterParser.getValue(node, "__WHERE__");
+    if (where != null) {
+    	where = where.replace('\r', ' ').replace("\n", "\\n\" +\n\"");
+    } else {
+    	where = "null";
+    }
+    boolean useSelfDefinedSourceKey = "true".equals(ElementParameterParser.getValue(node, "__USE_SELF_DEFINED_SOURCE_KEY__"));
+    boolean trackChangesForAll = "true".equals(ElementParameterParser.getValue(node, "__TRACK_CHANGES_FOR_ALL_FIELD__"));
+	List<Map<String, String>> suppleSourceColumnConfig = (List<Map<String, String>>) ElementParameterParser.getObjectValue(node, "__SUPPLEMENTARY_SOURCE_COLUMN_CONFIG__");
+    List<String> trackColumnList = new ArrayList<String>();
+    List<String> keyColumnList = new ArrayList<String>();
+    List<String> ignoreList = new ArrayList<String>();
+    for (Map<String, String> entry : suppleSourceColumnConfig) {
+    	if ("false".equals(entry.get("IGNORE"))) {
+	    	if (trackChangesForAll == false && "true".equals(entry.get("TRACK_CHANGES"))) {
+	    		trackColumnList.add(entry.get("SCHEMA_COLUMN"));
+	    	}
+	    	if ("true".equals(entry.get("IS_SOURCE_KEY"))) {
+	    		keyColumnList.add(entry.get("SCHEMA_COLUMN"));
+	    	}
+    	} else {
+    		ignoreList.add(entry.get("SCHEMA_COLUMN"));
+    	}
+    }
+    String targetSchema = ElementParameterParser.getValue(node, "__TARGET_SCHEMA__");
+    String targetTable = ElementParameterParser.getValue(node, "__TARGET_TABLE__");
+    String targetTableHist = ElementParameterParser.getValue(node, "__TARGET_TABLE_HIST__");
+    String targetTablespace = ElementParameterParser.getValue(node, "__TARGET_TABLESPACE__");
+    boolean createTableIfNotExist = "true".equals(ElementParameterParser.getValue(node, "__CREATE_TABLE_IF_NOT_EXISTS__"));
+    boolean createIndexes = "true".equals(ElementParameterParser.getValue(node, "__CREATE_INDEXES__"));
+    boolean useSpecificTablespace = "true".equals(ElementParameterParser.getValue(node, "__USE_SPECIFIC_TABLESPACE__"));
+    boolean switchOnVersioningAtStart = "true".equals(ElementParameterParser.getValue(node, "__SWITCH_ON_VERSIONING_AT_START__"));
+    boolean switchOffVersioningAtTheEnd = "true".equals(ElementParameterParser.getValue(node, "__SWITCH_OFF_VERSIONING_AT_THE_END__"));
+    String skeyColumn = ElementParameterParser.getValue(node, "__SURROGATE_KEY__");
+    boolean useBusinessTimeperiod = "true".equals(ElementParameterParser.getValue(node, "__USE_BUSINESS_TIMEPERIOD__"));
+	String busTimeperiodStartColumn = ElementParameterParser.getValue(node, "__BUSINESS_TIMEPERIOD_START__");
+	String busTimeperiodStartValue = ElementParameterParser.getValue(node, "__BUSINESS_TIMEPERIOD_START_VALUE__");
+	String busTimeperiodEndColumn = ElementParameterParser.getValue(node, "__BUSINESS_TIMEPERIOD_END__");
+	String busTimeperiodEndValue = ElementParameterParser.getValue(node, "__BUSINESS_TIMEPERIOD_END_VALUE_FOR_UPDATE__");
+	String busTimeperiodIsDateType = ElementParameterParser.getValue(node, "__BUSINESS_TIMEPERIOD_IS_DATE__");
+	String sysTimeperiodStartColumn = ElementParameterParser.getValue(node, "__SYSTEM_TIMEPERIOD_START__");
+	String sysTimeperiodEndColumn = ElementParameterParser.getValue(node, "__SYSTEM_TIMEPERIOD_END__");
+	String farFutureDate = ElementParameterParser.getValue(node, "__BUSINESS_TIMEPERIOD_END_VALUE_FOR_INSERT__");
+	List<Map<String, String>> additionalTargetColumnConfig = (List<Map<String, String>>) ElementParameterParser.getObjectValue(node, "__ADDITIONAL_TARGET_COLUMNS__");
+	String debug = ElementParameterParser.getValue(node, "__DEBUG__");
+	List<IMetadataColumn> listColumns = new ArrayList<IMetadataColumn>(); // dummy
+	List<IMetadataTable> metadatas = node.getMetadataList();
+	if (metadatas != null && metadatas.size() > 0) {
+    	IMetadataTable metadata = metadatas.get(0);
+    	if (metadata != null) {
+    		listColumns = metadata.getListColumns();
+		}
+	}
+	String enableStatementLog = ElementParameterParser.getValue(node, "__LOG_STATS__");
+	if (enableStatementLog == null || enableStatementLog.trim().isEmpty()) {
+		enableStatementLog = "false";
+	}
+	String statementLogFile = ElementParameterParser.getValue(node, "__LOG_STATS_FILE__");
+	String createPk = ElementParameterParser.getValue(node, "__CREATE_PK__");
+	String doNotExecute = ElementParameterParser.getValue(node, "__NO_EXEC_MODE__");
+	String transStartColumnName = ElementParameterParser.getValue(node, "__TRANS_START_COLUMN_NAME__");
+	String deleteCondition = ElementParameterParser.getValue(node, "__DELETE_CONDITION__");
+	boolean appendOn = "true".equals(ElementParameterParser.getValue(node, "__HIST_TABLE_APPEND_ON__"));
+%>
+	de.cimt.talendcomp.db2.temporal.TemporalMerger <%=cid%> = new de.cimt.talendcomp.db2.temporal.TemporalMerger();
+	<%=cid%>.setDebug(<%=debug%>);
+	<%=cid%>.setEnableLogStatements(<%=enableStatementLog%>);
+<%  if (statementLogFile != null && statementLogFile.trim().isEmpty() == false) { %>
+	<%=cid%>.setStatementsLogFile(<%=statementLogFile%>, jobName + ":<%=cid%>");
+<%  } %>
+    // add target metadata tables
+    <%=cid%>.setUseBusinessTime(<%=useBusinessTimeperiod%>);
+<%  if (useBusinessTimeperiod) { %>
+	<%=cid%>.setBusinessTimePeriodStartColumn(<%=busTimeperiodStartColumn%>);
+	<%=cid%>.setBusinessTimePeriodEndColumn(<%=busTimeperiodEndColumn%>);
+	<%=cid%>.setBusinessTimeIsDay(<%=busTimeperiodIsDateType%>);
+	<%=cid%>.setBusinessTimeStartValue(<%=busTimeperiodStartValue%>);
+	<%=cid%>.setBusinessTimeEndValue(<%=busTimeperiodEndValue%>);
+<%  } %>
+	<%=cid%>.setSystemTimePeriodStartColumn(<%=sysTimeperiodStartColumn%>);
+	<%=cid%>.setSystemTimePeriodEndColumn(<%=sysTimeperiodEndColumn%>);
+<%  if (useExistingConnection) { %>
+	<%=cid%>.setConnection((java.sql.Connection) globalMap.get("conn_" + "<%=connection%>"));
+	<%=cid%>.setSourceSchema((String) globalMap.get("tableschema_" + "<%=connection%>"));
+<%	} else { %>
+	try {
+	    // connect to database
+		<%=cid%>.connect(<%=host%>, <%=port%>, <%=database%>, <%=user%>, <%=password%>, <%=connectionProperties%>);
+	} catch (Exception e) {
+		String message = "Connect to database failed:" + e.getMessage();
+		globalMap.put("<%=cid%>_ERROR_MESSAGE", message);
+		throw new Exception(message, e);
+	}
+	<%=cid%>.setSourceSchema(<%=sourceSchema%>);
+<%	} %>
+	<%=cid%>.setSourceTable(<%=sourceTable%>);
+<%  if (where != null && where.isEmpty() == false) { %>
+	<%=cid%>.setSourceWhereCondition(<%=where%>);
+<%	} %>
+	// add source fields
+<%  for (IMetadataColumn column : listColumns) { 
+		String name = column.getLabel();
+		String type = column.getType();
+		Integer length = column.getLength();
+		Integer precision = column.getPrecision(); 
+		boolean nullable = column.isNullable(); 
+		boolean isKey = column.isKey(); 
+		if (useSelfDefinedSourceKey) {
+			isKey = keyColumnList.contains(name);
+		}
+		boolean trackChanges = trackColumnList.contains(name);
+		if (ignoreList.contains(name) == false) { %>
+	<%=cid%>.addSourceColumn("<%=name%>", "<%=type%>", <%=length%>, <%=precision%>, <%=nullable%>, <%=isKey%>, <%=trackChanges%>);
+<%      } %>
+<%  } %>
+    // target table configuration
+    <%=cid%>.setTargetSchema(<%=targetSchema%>);
+    <%=cid%>.setTargetTable(<%=targetTable%>);
+<%  if (targetTableHist != null && targetTableHist.trim().isEmpty() == false) { %>
+    // set alternative history table name
+	<%=cid%>.setHistTableName(<%=targetTableHist%>);
+<%  } %>
+<%  if (transStartColumnName != null && transStartColumnName.trim().isEmpty() == false) { %>
+    // use alternative name for TRANS_START column
+    <%=cid%>.setTransStartColumn(<%=transStartColumnName%>);
+<%  } %>
+<%  if (skeyColumn != null && skeyColumn.isEmpty() == false) { %>
+	// add surrogate key column as auto increment column
+	<%=cid%>.addAdditionalColumn(<%=skeyColumn%>, "BIGINT", 10, 0, false, true, false).setAutoIncrement(true);
+<%  } %>
+    // add additional target columns   
+<%  for (Map<String, String> config : additionalTargetColumnConfig) { 
+		String name = config.get("NAME");
+		String type = config.get("TYPE");
+		String length = config.get("LENGTH");
+		if (length == null || length.isEmpty()) {
+			length = "null";
+		}
+		String precision = config.get("PRECISION");
+		if (precision == null || precision.isEmpty()) {
+			precision = "null";
+		}
+		String nullable = config.get("NULLABLE");
+		String forInsert = config.get("FOR_INSERT");
+		String forUpdate = config.get("FOR_UPDATE");
+		String value = config.get("VALUE");
+%>
+	<%=cid%>.addAdditionalColumn(<%=name%>, "<%=type%>", <%=length%>, <%=precision%>, <%=nullable%>, <%=forInsert%>, <%=forUpdate%>);
+<%  	if (value != null && value.isEmpty() == false) { %>
+	<%=cid%>.setParamValue(<%=name%>, <%=value%>);
+<%  	} %>	
+<%  } %>
+    <%=cid%>.setScdEndDate(<%=farFutureDate%>);
+<%  if (deleteCondition != null && deleteCondition.trim().isEmpty() == false) { %>
+	<%=cid%>.setDeleteCondition(<%=deleteCondition%>);
+<%  } %>
+<%  if (doNotExecute != null && doNotExecute.trim().isEmpty() == false) { %>
+    // if true none ddl or modifying statements will be executed on the database
+	<%=cid%>.doNotExecuteMode(<%=doNotExecute%>);
+	if (<%=doNotExecute%>) {
+		System.err.println("<%=cid%> runs in DO NOT EXECUTE MODE !!");
+	}
+<%  } %>
+<%  if (createTableIfNotExist) { %>
+	// check table
+	try {
+		if (<%=cid%>.existsTargetTable() == false) {
+			System.out.println("Create table " + <%=targetTable%>);
+<%  if (useSpecificTablespace) { %>
+			<%=cid%>.setTargetTableSpace(<%=targetTablespace%>);
+			<%=cid%>.executeCreateTablespace();
+<%  } %>
+			<%=cid%>.setBuildTargetTableWithPk(<%=createPk%>);
+			// create table without temporal capabilities
+			<%=cid%>.executeCreateTable();
+			// setup the temporal capabilities 
+			<%=cid%>.executeSetupTableAsTemporal();
+<%  if (createIndexes) { %>
+			// create indexe for source key
+			<%=cid%>.executeCreateIndexForSrcKey();
+<%  	if (useBusinessTimeperiod) { %> 			
+			// create index for business timeperiod
+			<%=cid%>.executeCreateIndexforBUSTP();
+<%      } %>
+			// create index for system timeperiod
+			<%=cid%>.executeCreateIndexforSYSTP();
+<%  } %>
+			<%=cid%>.executeCreateHistTable();
+<%  if (appendOn) { %>
+			<%=cid%>.executeAlterHistTableAppendOn();
+<%  } %>
+			<%=cid%>.executeAlterTableAddVersioning();
+<%  if (switchOnVersioningAtStart) { %>
+		} else {
+			// attempt to switch on versioning because of possible switched off
+			<%=cid%>.executeAlterTableAddVersioning();
+<%  } %>
+		}
+	} catch (Exception e) {
+		String message = "Create and alter table failed: " + e.getMessage();
+		globalMap.put("<%=cid%>_ERROR_MESSAGE", message);
+		throw new Exception(message, e);
+	}
+<%  } %>
+	// run merge statement
+	try {
+		System.out.println("execute merge...");
+		int count = <%=cid%>.executeMerge();
+		System.out.println("merge finished succesfully. Count merged data sets:" + count);
+		globalMap.put("<%=cid%>_COUNT_MERGED", count);
+<%  if (switchOffVersioningAtTheEnd && switchOnVersioningAtStart) { %>
+		// switch off versioning
+		<%=cid%>.executeAlterTableDropVersioning();
+<%  } %>
+	} catch (Exception e) {
+		String message = "Merge failed: " + e.getMessage();
+		globalMap.put("<%=cid%>_ERROR_MESSAGE", message);
+		throw new Exception(message, e);
+	}
