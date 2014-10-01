@@ -14,11 +14,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -66,6 +68,16 @@ public class TemporalMerger {
 	private File statementLogFile = null;
 	private String logSectionComent = null;
 	private String deleteCondition = null;
+	private SimpleDateFormat sdfDate = null;
+	private SimpleDateFormat sdfTimestamp = null;
+	private NumberFormat nf = null;
+	
+	public TemporalMerger() {
+		nf = NumberFormat.getInstance(Locale.ENGLISH);
+		nf.setGroupingUsed(false);
+		sdfDate = new SimpleDateFormat("yyyy-MM-dd");
+		sdfTimestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+	}
 	
 	public void setDebug(boolean debug) {
 		this.debug = debug;
@@ -334,7 +346,7 @@ public class TemporalMerger {
 				String s = "Prepare param: #"
 						+ (i+1)
 						+ " "
-						+ preparedParamList.get(i) + " = " + value;
+						+ preparedParamList.get(i) + " = " + toSQLString(value) + " class:" + (value != null ? value.getClass().getName() : "");
 				comment.append(s);
 				comment.append("\n");
 				if (debug) {
@@ -365,6 +377,24 @@ public class TemporalMerger {
 			}
 		}
 		return countChangedDatasets;
+	}
+	
+	private String toSQLString(Object o) {
+		if (o instanceof Timestamp) {
+			return "'" + sdfTimestamp.format((Timestamp) o) + "'";
+		} else if (o instanceof Date) {
+			return sdfDate.format((Date) o);
+		} else if (o instanceof Number) {
+			return nf.format((Number) o);
+		} else if (o instanceof String) {
+			return "'" + ((String) o) + "'";
+		} else if (o instanceof Boolean) {
+			return ((Boolean) o) ? "true" : "false";
+		} else if (o != null) {
+			return o.toString();
+		} else {
+			return "null";
+		}
 	}
 
 	private void setParamValue(
@@ -1247,7 +1277,7 @@ public class TemporalMerger {
 		// update statement
 		buildMergeStatementUpdate(sb, paramIndex);
 		// delete statement (only if we have an delete condition)
-		if (deleteCondition != null) {
+		if (deleteCondition != null && deleteCondition.isEmpty() == false) {
 			buildMergeStatementDelete(sb, paramIndex);
 		}
 		String sql = sb.toString();
@@ -1259,11 +1289,19 @@ public class TemporalMerger {
 	}
 
 	public void setBusinessTimeStartValue(Date start) {
-		paramValues.put("businessTimeStartValue", start);
+		if (businessTimeIsDay) {
+			paramValues.put("businessTimeStartValue", start);
+		} else {
+			paramValues.put("businessTimeStartValue", new Timestamp(start.getTime()));
+		}
 	}
 
 	public void setBusinessTimeEndValue(Date end) {
-		paramValues.put("businessTimeEndValue", end);
+		if (businessTimeIsDay) {
+			paramValues.put("businessTimeEndValue", end);
+		} else {
+			paramValues.put("businessTimeEndValue", new Timestamp(end.getTime()));
+		}
 	}
 
 	public boolean existsTargetTable() throws Exception {
