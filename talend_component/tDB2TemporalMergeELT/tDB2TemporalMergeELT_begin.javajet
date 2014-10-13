@@ -4,15 +4,10 @@
 		org.talend.core.model.process.ElementParameterParser 
 		org.talend.core.model.metadata.IMetadataTable 
 		org.talend.core.model.metadata.IMetadataColumn 
-		org.talend.core.model.process.IConnection
-		org.talend.core.model.process.IConnectionCategory
 		org.talend.designer.codegen.config.CodeGeneratorArgument
-		org.talend.core.model.metadata.types.JavaTypesManager
-		org.talend.core.model.metadata.types.JavaType
 		java.util.List
 		java.util.ArrayList
     	java.util.Map
-    	java.util.HashMap
 	" 
 %>
 
@@ -241,7 +236,7 @@
 	try {
 		System.out.println("execute merge...");
 		int count = <%=cid%>.executeMerge();
-		System.out.println("merge finished succesfully. Count merged data sets:" + count);
+		System.out.println("Merge finished successfully. Count merged records:" + count);
 		globalMap.put("<%=cid%>_COUNT_MERGED", count);
 <%  if (switchOffVersioningAtTheEnd && switchOnVersioningAtStart) { %>
 		// switch off versioning
