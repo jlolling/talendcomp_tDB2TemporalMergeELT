@@ -1,7 +1,7 @@
 import java.util.Date;
 
-import de.cimt.talendcomp.db2.temporal.TemporalDelete;
-import de.cimt.talendcomp.db2.temporal.TemporalMerger;
+import de.jlo.talendcomp.db2.temporal.TemporalDelete;
+import de.jlo.talendcomp.db2.temporal.TemporalMerger;
 
 
 public class TestCodeGenerator {

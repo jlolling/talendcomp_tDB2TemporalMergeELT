@@ -1,6 +1,6 @@
 <COMPONENT>
-	<HEADER PLATEFORM="ALL" SERIAL="" VERSION="3.0" STATUS="PROD"
-		COMPATIBILITY="ALL" AUTHOR="cimt AG" RELEASE_DATE="20141001A"
+	<HEADER PLATEFORM="ALL" SERIAL="" VERSION="3.1" STATUS="PROD"
+		COMPATIBILITY="ALL" AUTHOR="Jan Lolling" RELEASE_DATE="20150115A"
 		STARTABLE="true" SCHEMA_AUTO_PROPAGATE="false">
 		<SIGNATURE />
 	</HEADER>
@@ -84,7 +84,7 @@
 		</PARAMETER>
 
 		<PARAMETER NAME="WHERE" FIELD="MEMO" GROUP="SOURCE_CONFIG"
-			NUM_ROW="51" >
+			NUM_ROW="51" NB_LINES="3">
 			<DEFAULT></DEFAULT>
 		</PARAMETER>
 
@@ -198,7 +198,7 @@
 		</PARAMETER>
 		
 		<PARAMETER NAME="ADDITIONAL_TARGET_COLUMNS" FIELD="TABLE"
-			GROUP="TARGET_CONFIG" NUM_ROW="73" NB_LINES="10">
+			GROUP="TARGET_CONFIG" NUM_ROW="73" NB_LINES="5">
 			<ITEMS>
 				<ITEM NAME="NAME" FIELD="TEXT" VALUE="" />
 				<ITEM NAME="TYPE" FIELD="CLOSED_LIST">
@@ -273,7 +273,7 @@
 
 	<CODEGENERATION>
 		<IMPORTS>
-			<IMPORT NAME="cimt.talendcomp.db2scdelt" MODULE="cimt.talendcomp.db2scdelt-3.0.jar"
+			<IMPORT NAME="jlo.talendcomp.db2scdelt" MODULE="jlo.talendcomp.db2scdelt-3.1.jar"
 				REQUIRED="true" />
 			<IMPORT NAME="Driver-DB2" MODULE="db2jcc.jar"
 				UrlPath="platform:/plugin/org.talend.libraries.jdbc.db2/lib/db2jcc.jar"
