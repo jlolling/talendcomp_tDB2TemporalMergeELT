@@ -36,6 +36,7 @@
     }
     boolean useSelfDefinedSourceKey = "true".equals(ElementParameterParser.getValue(node, "__USE_SELF_DEFINED_SOURCE_KEY__"));
     boolean trackChangesForAll = "true".equals(ElementParameterParser.getValue(node, "__TRACK_CHANGES_FOR_ALL_FIELD__"));
+	@SuppressWarnings("unchecked")
 	List<Map<String, String>> suppleSourceColumnConfig = (List<Map<String, String>>) ElementParameterParser.getObjectValue(node, "__SUPPLEMENTARY_SOURCE_COLUMN_CONFIG__");
     List<String> trackColumnList = new ArrayList<String>();
     List<String> keyColumnList = new ArrayList<String>();
@@ -71,6 +72,7 @@
 	String sysTimeperiodStartColumn = ElementParameterParser.getValue(node, "__SYSTEM_TIMEPERIOD_START__");
 	String sysTimeperiodEndColumn = ElementParameterParser.getValue(node, "__SYSTEM_TIMEPERIOD_END__");
 	String farFutureDate = ElementParameterParser.getValue(node, "__BUSINESS_TIMEPERIOD_END_VALUE_FOR_INSERT__");
+	@SuppressWarnings("unchecked")
 	List<Map<String, String>> additionalTargetColumnConfig = (List<Map<String, String>>) ElementParameterParser.getObjectValue(node, "__ADDITIONAL_TARGET_COLUMNS__");
 	String debug = ElementParameterParser.getValue(node, "__DEBUG__");
 	List<IMetadataColumn> listColumns = new ArrayList<IMetadataColumn>(); // dummy
@@ -92,7 +94,7 @@
 	String deleteCondition = ElementParameterParser.getValue(node, "__DELETE_CONDITION__");
 	boolean appendOn = "true".equals(ElementParameterParser.getValue(node, "__HIST_TABLE_APPEND_ON__"));
 %>
-	de.cimt.talendcomp.db2.temporal.TemporalMerger <%=cid%> = new de.cimt.talendcomp.db2.temporal.TemporalMerger();
+	de.jlo.talendcomp.db2.temporal.TemporalMerger <%=cid%> = new de.jlo.talendcomp.db2.temporal.TemporalMerger();
 	<%=cid%>.setDebug(<%=debug%>);
 	<%=cid%>.setEnableLogStatements(<%=enableStatementLog%>);
 <%  if (statementLogFile != null && statementLogFile.trim().isEmpty() == false) { %>

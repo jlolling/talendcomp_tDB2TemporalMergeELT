@@ -13,7 +13,7 @@
 
 <% 
     CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
-    INode node = (INode)codeGenArgument.getArgument();
+    INode node = (INode) codeGenArgument.getArgument();
     String cid = node.getUniqueName();
     boolean useExistingConnection = "true".equals(ElementParameterParser.getValue(node, "__USE_EXISTING_CONNECTION__"));
     String connection = ElementParameterParser.getValue(node, "__CONNECTION__");
@@ -28,13 +28,21 @@
     String user = ElementParameterParser.getValue(node, "__USER__");
     String password = ElementParameterParser.getValue(node, "__PASS__");
     String sourceTable = ElementParameterParser.getValue(node, "__TABLE__");
-    String where = ElementParameterParser.getValue(node, "__WHERE__");
-    if (where != null) {
-    	where = where.replace('\r', ' ').replace("\n", "\\n\" +\n\"");
+    String sourceWhere = ElementParameterParser.getValue(node, "__SOURCE_WHERE__");
+    if (sourceWhere != null) {
+    	sourceWhere = sourceWhere.replace('\r', ' ').replace("\n", "\\n\" +\n\"");
     } else {
-    	where = "null";
+    	sourceWhere = "null";
+    }
+    boolean applyWhereToTarget = "true".equals(ElementParameterParser.getValue(node, "__SOURCE_WHERE_APPLY_TO_TARGET__"));
+    String deleteWhere = ElementParameterParser.getValue(node, "__WHERE__");
+    if (deleteWhere != null) {
+    	deleteWhere = deleteWhere.replace('\r', ' ').replace("\n", "\\n\" +\n\"");
+    } else {
+    	deleteWhere = "null";
     }
     boolean useSelfDefinedSourceKey = "true".equals(ElementParameterParser.getValue(node, "__USE_SELF_DEFINED_SOURCE_KEY__"));
+	@SuppressWarnings("unchecked")
 	List<Map<String, String>> suppleSourceColumnConfig = (List<Map<String, String>>) ElementParameterParser.getObjectValue(node, "__SUPPLEMENTARY_SOURCE_COLUMN_CONFIG__");
     List<String> keyColumnList = new ArrayList<String>();
     for (Map<String, String> entry : suppleSourceColumnConfig) {
@@ -44,6 +52,7 @@
     }
     String targetSchema = ElementParameterParser.getValue(node, "__TARGET_SCHEMA__");
     String targetTable = ElementParameterParser.getValue(node, "__TARGET_TABLE__");
+    String targetTableHist = ElementParameterParser.getValue(node, "__TARGET_TABLE_HIST__");
     boolean switchOnVersioningAtStart = "true".equals(ElementParameterParser.getValue(node, "__SWITCH_ON_VERSIONING_AT_START__"));
     boolean switchOffVersioningAtTheEnd = "true".equals(ElementParameterParser.getValue(node, "__SWITCH_OFF_VERSIONING_AT_THE_END__"));
 	String busTimeperiodStartValue = ElementParameterParser.getValue(node, "__BUSINESS_TIMEPERIOD_START_VALUE__");
@@ -65,7 +74,7 @@
 	String statementLogFile = ElementParameterParser.getValue(node, "__LOG_STATS_FILE__");
 	String doNotExecute = ElementParameterParser.getValue(node, "__NO_EXEC_MODE__");
 %>
-	de.cimt.talendcomp.db2.temporal.TemporalDelete <%=cid%> = new de.cimt.talendcomp.db2.temporal.TemporalDelete();
+	de.jlo.talendcomp.db2.temporal.TemporalDelete <%=cid%> = new de.jlo.talendcomp.db2.temporal.TemporalDelete();
 	<%=cid%>.setDebug(<%=debug%>);
 	<%=cid%>.setEnableLogStatements(<%=enableStatementLog%>);
 <%  if (statementLogFile != null && statementLogFile.trim().isEmpty() == false) { %>
@@ -90,8 +99,12 @@
 	<%=cid%>.setSourceSchema(<%=sourceSchema%>);
 <%	} %>
 	<%=cid%>.setSourceTable(<%=sourceTable%>);
-<%  if (where != null && where.isEmpty() == false) { %>
-	<%=cid%>.setSourceWhereCondition(<%=where%>);
+<%  if (sourceWhere != null && sourceWhere.isEmpty() == false) { %>
+	<%=cid%>.setSourceWhereCondition(<%=sourceWhere%>);
+	<%=cid%>.setApplySourceWhereCondToTarget(<%=applyWhereToTarget%>);
+<%	} %>
+<%  if (deleteWhere != null && deleteWhere.isEmpty() == false) { %>
+	<%=cid%>.setDeleteWhereCondition(<%=deleteWhere%>);
 <%	} %>
 	// add source fields
 <%  for (IMetadataColumn column : listColumns) { 
@@ -111,6 +124,10 @@
     // target table configuration
     <%=cid%>.setTargetSchema(<%=targetSchema%>);
     <%=cid%>.setTargetTable(<%=targetTable%>);
+<%  if (targetTableHist != null && targetTableHist.trim().isEmpty() == false) { %>
+    // set alternative history table name
+	<%=cid%>.setHistTableName(<%=targetTableHist%>);
+<%  } %>
 <%  if (doNotExecute != null && doNotExecute.trim().isEmpty() == false) { %>
     // if true none ddl or modifying statements will be executed on the database
 	<%=cid%>.doNotExecuteMode(<%=doNotExecute%>);
@@ -118,27 +135,35 @@
 		System.err.println("<%=cid%> runs in DO NOT EXECUTE MODE !!");
 	}
 <%  } %>
+<%  if (switchOnVersioningAtStart) { %>
 	// check table
 	try {
 		// attempt to switch on versioning because of possible switched off
 		<%=cid%>.executeAlterTableAddVersioning();
 	} catch (Exception e) {
-		String message = "Alter table failed: " + e.getMessage();
+		String message = "Alter table add versioning failed: " + e.getMessage();
 		globalMap.put("<%=cid%>_ERROR_MESSAGE", message);
 		throw new Exception(message, e);
 	}
+<%  } %>
 	// run delete statement
 	try {
 		System.out.println("Execute delete...");
 		int count = <%=cid%>.executeDelete();
 		System.out.println("Delete finished successfully. Count deleted records:" + count);
 		globalMap.put("<%=cid%>_COUNT_DELETED", count);
-<%  if (switchOffVersioningAtTheEnd && switchOnVersioningAtStart) { %>
-		// switch off versioning
-		<%=cid%>.executeAlterTableDropVersioning();
-<%  } %>
 	} catch (Exception e) {
 		String message = "Delete failed: " + e.getMessage();
 		globalMap.put("<%=cid%>_ERROR_MESSAGE", message);
 		throw new Exception(message, e);
 	}
+<%  if (switchOffVersioningAtTheEnd && switchOnVersioningAtStart) { %>
+	// switch off versioning
+	try {
+		<%=cid%>.executeAlterTableDropVersioning();
+	} catch (Exception e) {
+		String message = "Alter table switch off versioning failed: " + e.getMessage();
+		globalMap.put("<%=cid%>_ERROR_MESSAGE", message);
+		throw new Exception(message, e);
+	}
+<%  } %>

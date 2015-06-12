@@ -8,7 +8,7 @@
     <property name="build" location="build" />
 	<property name="lib" location="lib" />
 	<property name="distrib" location="distrib" />
-	<property name="appfilename_wo_ext" value="cimt.talendcomp.db2scdelt" />
+	<property name="appfilename_wo_ext" value="jlo.talendcomp.db2scdelt" />
     <property name="componentname1" value="tDB2TemporalMergeELT" />
     <property name="componentname2" value="tDB2TemporalDeleteELT" />
 	
