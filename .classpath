@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test_src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="/Volumes/Data/Talend/workspace_talend_comp/talendcomp_tabletransfer/talend_component/tDB2TableTransfer/db2jcc4.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/Talend/workspace_talend_comp/talendcomp_tabletransfer/talend_component/tDB2TableTransfer/db2jcc_license_cu.jar"/>
+	<classpathentry kind="lib" path="lib/db2jcc_license_cu.jar"/>
+	<classpathentry kind="lib" path="lib/db2jcc4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
