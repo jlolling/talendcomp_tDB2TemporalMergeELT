@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.jlo.talendcomp.db2.temporal;
+package de.cimt.talendcomp.db2.temporal;
 
 import java.io.BufferedWriter;
 import java.io.File;

@@ -94,7 +94,7 @@
 	String deleteCondition = ElementParameterParser.getValue(node, "__DELETE_CONDITION__");
 	boolean appendOn = "true".equals(ElementParameterParser.getValue(node, "__HIST_TABLE_APPEND_ON__"));
 %>
-	de.jlo.talendcomp.db2.temporal.TemporalMerger <%=cid%> = new de.jlo.talendcomp.db2.temporal.TemporalMerger();
+	de.cimt.talendcomp.db2.temporal.TemporalMerger <%=cid%> = new de.cimt.talendcomp.db2.temporal.TemporalMerger();
 	<%=cid%>.setDebug(<%=debug%>);
 	<%=cid%>.setEnableLogStatements(<%=enableStatementLog%>);
 <%  if (statementLogFile != null && statementLogFile.trim().isEmpty() == false) { %>

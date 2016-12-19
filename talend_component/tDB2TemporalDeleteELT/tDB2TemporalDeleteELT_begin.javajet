@@ -74,7 +74,7 @@
 	String statementLogFile = ElementParameterParser.getValue(node, "__LOG_STATS_FILE__");
 	String doNotExecute = ElementParameterParser.getValue(node, "__NO_EXEC_MODE__");
 %>
-	de.jlo.talendcomp.db2.temporal.TemporalDelete <%=cid%> = new de.jlo.talendcomp.db2.temporal.TemporalDelete();
+	de.cimt.talendcomp.db2.temporal.TemporalDelete <%=cid%> = new de.cimt.talendcomp.db2.temporal.TemporalDelete();
 	<%=cid%>.setDebug(<%=debug%>);
 	<%=cid%>.setEnableLogStatements(<%=enableStatementLog%>);
 <%  if (statementLogFile != null && statementLogFile.trim().isEmpty() == false) { %>

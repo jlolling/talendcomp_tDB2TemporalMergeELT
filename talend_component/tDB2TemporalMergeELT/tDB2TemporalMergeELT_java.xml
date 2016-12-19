@@ -1,6 +1,6 @@
 <COMPONENT>
 	<HEADER PLATEFORM="ALL" SERIAL="" VERSION="3.1" STATUS="PROD"
-		COMPATIBILITY="ALL" AUTHOR="Jan Lolling" RELEASE_DATE="20150115A"
+		COMPATIBILITY="ALL" AUTHOR="cimt AG" RELEASE_DATE="20150115A"
 		STARTABLE="true" SCHEMA_AUTO_PROPAGATE="false">
 		<SIGNATURE />
 	</HEADER>
@@ -273,7 +273,7 @@
 
 	<CODEGENERATION>
 		<IMPORTS>
-			<IMPORT NAME="jlo.talendcomp.db2scdelt" MODULE="jlo.talendcomp.db2scdelt-3.1.jar"
+			<IMPORT NAME="cimt-talendcomp-db2scdelt" MODULE="cimt-talendcomp-db2scdelt-3.1.jar"
 				REQUIRED="true" />
 			<IMPORT NAME="Driver-DB2" MODULE="db2jcc.jar"
 				UrlPath="platform:/plugin/org.talend.libraries.jdbc.db2/lib/db2jcc.jar"
